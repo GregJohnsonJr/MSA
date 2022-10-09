@@ -177,9 +177,17 @@ void Alignment::MSA()
 	CreateGuideTree();
 }
 
-void Alignment::CreateGuideTree() const
+void Alignment::CreateGuideTree()
 {
-	std::unordered_map<std::string, int> distances;
+	_distanceMatrix = new Matrix(_sequences.size() + 1, _sequences.size() + 1);
+	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	{
+		_distanceMatrix->matrix[i][0] = new Matrix::MatrixNode();
+		_distanceMatrix->matrix[0][i] = new Matrix::MatrixNode();
+		_distanceMatrix->matrix[i][0]->_val = _sequences[i - 1].name;
+		_distanceMatrix->matrix[0][i]->_val = _sequences[i - 1].name;
+	}
+	std::unordered_map<std::string, float> distances;
 	for(const auto &i : _alignmentScores)
 	{
 		std::string delimiter = "+";
@@ -187,17 +195,41 @@ void Alignment::CreateGuideTree() const
 		std::string initialSequence = _sequenceFile.sequenceMap.at(token).sequence;
 		std::string otherSequence = i.second.second;
 		//now find the hamming distance with the aligned Sequence
-		int length = otherSequence.length() > initialSequence.length() ? otherSequence.size() : initialSequence.size();
+		int length = otherSequence.length() < initialSequence.length() ? otherSequence.size() : initialSequence.size();
 		int matches = 0;
-		int hammingDistance = 0;
+		float hammingDistance = 0;
 		for(int i = 0; i < length; i++)
 		{
 			if(otherSequence[i] == initialSequence[i])
 				matches++;
 		}
-		hammingDistance = matches/length;
-		
+		hammingDistance = (float)(length - matches)/(float)length;
+		distances.insert({i.first, hammingDistance});
 	}
+	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	{
+		std::string nameOne = _distanceMatrix->matrix[i][0]->_val;
+		for(int j = i + 1; j < _distanceMatrix->matrix[0].size(); j++)
+		{
+			std::string currentName = _distanceMatrix->matrix[0][j]->_val;
+			std::string key = nameOne + "+" +(currentName);
+			float val = distances[key];
+			_distanceMatrix->matrix[i][j] = new Matrix::MatrixNode();
+			_distanceMatrix->matrix[i][j]->_val = std::to_string(ApproximateGuideTree(val));
+		}
+	}
+	//GUIDE TREE CREATED!!!!
+	// Jukes cantor then create outgroups
+	
+}
+
+float Alignment::ApproximateGuideTree(float val)
+{
+	float newValue = (1 - ((4/3) * val ));
+	newValue = std::abs(newValue);
+	newValue = std::log(newValue);
+	newValue = (-0.75) * newValue;
+	return newValue;
 }
 
 std::string Alignment::FindLargestScoreInTable() const
