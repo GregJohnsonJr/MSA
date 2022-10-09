@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "Matrix.h"
 #include "Pam.h"
+#include <string.h>
 using namespace Matrices;
 class Alignment
 {
@@ -23,7 +24,7 @@ public:
 	Matrix::MatrixNode* GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string>);
 	void ScoreSequence(const Matrix::MatrixNode*, int, std::string, bool, std::string, std::string);
 	void MSA();
-	void CreateGuideTree();// Think i need a rebuild tree function
+	void CreateGuideTree() const;// Think i need a rebuild tree function
 	void ApproximateGuideTree();
 	void TransformMatrix();
 	void ConsensusSequence();

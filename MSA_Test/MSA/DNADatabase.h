@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class DNADatabase
@@ -36,6 +37,7 @@ public:
 	}
 	std::vector<DNADatabase::Sequences> ReadFile(); //Either force the user to input the directory or inform them to place to file inside of the solution...
 	std::vector<DNADatabase::Sequences> dnaSequences;
+	std::unordered_map<std::string, Sequences> sequenceMap;
 private:
 	std::string filePath;
 };

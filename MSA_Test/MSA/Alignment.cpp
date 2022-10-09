@@ -174,11 +174,30 @@ void Alignment::MSA()
 			std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
 		}
 	}
+	CreateGuideTree();
 }
 
-void Alignment::CreateGuideTree()
+void Alignment::CreateGuideTree() const
 {
-	
+	std::unordered_map<std::string, int> distances;
+	for(const auto &i : _alignmentScores)
+	{
+		std::string delimiter = "+";
+		std::string token = i.first.substr(0, i.first.find(delimiter));
+		std::string initialSequence = _sequenceFile.sequenceMap.at(token).sequence;
+		std::string otherSequence = i.second.second;
+		//now find the hamming distance with the aligned Sequence
+		int length = otherSequence.length() > initialSequence.length() ? otherSequence.size() : initialSequence.size();
+		int matches = 0;
+		int hammingDistance = 0;
+		for(int i = 0; i < length; i++)
+		{
+			if(otherSequence[i] == initialSequence[i])
+				matches++;
+		}
+		hammingDistance = matches/length;
+		
+	}
 }
 
 std::string Alignment::FindLargestScoreInTable() const

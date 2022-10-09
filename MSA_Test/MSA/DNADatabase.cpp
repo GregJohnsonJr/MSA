@@ -28,5 +28,9 @@ std::vector<DNADatabase::Sequences> DNADatabase::ReadFile()
         }
         dnaSequences[j].sequence += line;
     }
+    for(auto i : dnaSequences)
+    {
+        sequenceMap.insert({i.name, i});
+    }
     return dnaSequences;
 }
