@@ -1,0 +1,9 @@
+﻿  Alignment.cpp
+  DNADatabase.cpp
+  Matrix.cpp
+  MSA.cpp
+  Pam.cpp
+C:\Users\gregj\Documents\MSA\MSA_Test\MSA\Pam.h(65,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gregj\Documents\MSA\MSA_Test\MSA\Pam.h(66,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
+  MSA.vcxproj -> C:\Users\gregj\Documents\MSA\MSA_Test\x64\Debug\MSA.exe
