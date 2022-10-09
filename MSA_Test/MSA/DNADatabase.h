@@ -16,9 +16,10 @@ public:
 		{
 			return seq.name == this->name && seq.sequence == this->sequence;
 		}
-	private:
 		std::vector<std::string> SequenceToVector() const
 		{
+			if(!sequenceVector.empty())
+				return sequenceVector;
 			std::vector<std::string> seq;
 			for (const auto s : sequence)
 			{
@@ -26,8 +27,7 @@ public:
 			}
 			return seq;
 		}
-	public:
-		std::vector<std::string> sequenceVector = sequenceVector.size() < 0 ? SequenceToVector() : sequenceVector;  
+		std::vector<std::string> sequenceVector;
 	};
 	DNADatabase() {}
 	DNADatabase(const std::string _filePath)

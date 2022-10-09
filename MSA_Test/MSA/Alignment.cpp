@@ -110,7 +110,7 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 			alignedVal = "-";
 		}
 		alignment.append(alignedVal);
-		if (lastVal->_top != nullptr && lastVal->_parent != lastVal->_top && lastVal->_parent->_val == lastVal->_top->_val) // gap
+		if (lastVal->_top != nullptr &&  lastVal->_parent->_val == lastVal->_top->_val) // gap
 		{
 			if(isCurrentlyAfflineGap)
 			{
@@ -123,7 +123,7 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 			}
 			ScoreSequence(lastVal->_top, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
-		if (lastVal->_left != nullptr &&lastVal->_parent != lastVal->_left &&lastVal->_parent->_val == lastVal->_left->_val) // gap
+		if (lastVal->_left != nullptr &&lastVal->_parent->_val == lastVal->_left->_val) // gap
 		{
 			if(isCurrentlyAfflineGap)
 			{
@@ -136,16 +136,28 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 			}
 			ScoreSequence(lastVal->_left, score , alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
-		if (lastVal->_middle != nullptr && lastVal->_parent != lastVal->_middle &&lastVal->_parent->_val == lastVal->_middle->_val) //middle match
+		if (lastVal->_middle != nullptr &&lastVal->_parent->_val == lastVal->_middle->_val) //middle match
 		{
 			isCurrentlyAfflineGap = false;
 			ScoreSequence(lastVal->_middle, score + _matchScore, alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+		}
+		if(lastVal->_parent == nullptr)
+		{
+			ScoreSequence(lastVal->_parent, score, alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
 	}
 	else
 	{
 		std::string key = seqOne + "+" + seqTwo;
-		_alignmentScores.insert({key, score});
+		if (!(_alignmentScores.find(key) == _alignmentScores.end())) // if we do have the key
+		{
+			if(_alignmentScores[key].first < score) //It means this is a better alignment
+			{
+				_alignmentScores[key] = std::pair<int, std::string>(score, alignment);
+			} // otherwise nothing happens
+		}
+		else // we do not contain the key insert
+			_alignmentScores.insert({key, std::pair<int, std::string>(score, alignment)});
 	}
 }
 
@@ -156,8 +168,35 @@ void Alignment::MSA()
 	{
 		for(int j = i + 1; j < _sequences.size(); j++) // start at the next sequence
 		{
-			Matrix::MatrixNode* node = GlobalAlignment(_sequences[i].sequenceVector, _sequences[j].sequenceVector);
+			Matrix::MatrixNode* node = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
 			ScoreSequence(node, 0, "", false, _sequences[i].name, _sequences[j].name);
+			std::string key = _sequences[i].name + "+" + _sequences[j].name;
+			std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
 		}
 	}
+}
+
+void Alignment::CreateGuideTree()
+{
+	
+}
+
+std::string Alignment::FindLargestScoreInTable() const
+{
+	std::string key = " ";
+	int val = 0;
+	for(const auto &i : _alignmentScores)
+	{
+		if(key == " ")
+		{
+			key = i.first;
+			val = i.second.first;
+		}
+		else if(val < i.second.first)
+		{
+			val = i.second.first;
+			key = i.first;
+		}
+	}
+	return key;
 }

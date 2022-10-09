@@ -1,1 +1,2 @@
 C:\Users\gregj\Documents\MSA\MSA_Test\MSA_Test\x64\Debug\MSA_Test.vcxproj.CopyComplete
+C:\Users\gregj\Documents\MSA_Repo\MSA\MSA_Test\MSA_Test\x64\Debug\MSA_Test.vcxproj.CopyComplete

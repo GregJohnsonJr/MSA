@@ -141,6 +141,9 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Pam.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Alignmentsamplesequences\MSA_sequences.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
