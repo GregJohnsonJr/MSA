@@ -25,7 +25,8 @@ public:
 	void ScoreSequence(const Matrix::MatrixNode*, int, std::string, bool, std::string, std::string);
 	void MSA();
 	void CreateGuideTree();// Think i need a rebuild tree function
-	float ApproximateGuideTree(float);
+	float ApproximateGuideTree(float) const;
+	void CreateOutGroups() const;
 	void TransformMatrix();
 	void ConsensusSequence();
 	void GenerateNewickTree();

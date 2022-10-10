@@ -179,7 +179,7 @@ void Alignment::MSA()
 
 void Alignment::CreateGuideTree()
 {
-	_distanceMatrix = new Matrix(_sequences.size() + 1, _sequences.size() + 1);
+	_distanceMatrix = new Matrix(_sequences.size() + 1, _sequences.size() + 2);
 	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
 	{
 		_distanceMatrix->matrix[i][0] = new Matrix::MatrixNode();
@@ -209,27 +209,50 @@ void Alignment::CreateGuideTree()
 	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
 	{
 		std::string nameOne = _distanceMatrix->matrix[i][0]->_val;
-		for(int j = i + 1; j < _distanceMatrix->matrix[0].size(); j++)
+		for(int j = i + 1; j < _distanceMatrix->matrix[0].size() - 1; j++)
 		{
 			std::string currentName = _distanceMatrix->matrix[0][j]->_val;
 			std::string key = nameOne + "+" +(currentName);
 			float val = distances[key];
+			float approxVal = ApproximateGuideTree(val);
 			_distanceMatrix->matrix[i][j] = new Matrix::MatrixNode();
-			_distanceMatrix->matrix[i][j]->_val = std::to_string(ApproximateGuideTree(val));
+			_distanceMatrix->matrix[i][j]->_val = std::to_string(approxVal);
+			_distanceMatrix->matrix[j][i] = new Matrix::MatrixNode();
+			_distanceMatrix->matrix[j][i]->_val = std::to_string(approxVal);
 		}
 	}
 	//GUIDE TREE CREATED!!!!
 	// Jukes cantor then create outgroups
+	//OutGroups
+	CreateOutGroups();
 	
 }
 
-float Alignment::ApproximateGuideTree(float val)
+float Alignment::ApproximateGuideTree(float val) const
 {
 	float newValue = (1 - ((4/3) * val ));
 	newValue = std::abs(newValue);
 	newValue = std::log(newValue);
 	newValue = (-0.75) * newValue;
 	return newValue;
+}
+
+void Alignment::CreateOutGroups() const
+{
+	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	{
+		float outgroup = 0.0;
+		for(int j = 1; j < _distanceMatrix->matrix[0].size(); j++)
+		{
+			if(_distanceMatrix->matrix[i][j] == nullptr)
+				continue;
+			outgroup += std::stof(_distanceMatrix->matrix[i][j]->_val);
+		}
+		outgroup = outgroup/(float)((_distanceMatrix->matrix.size() - 1) - 2);
+		Matrix::MatrixNode* node = new Matrix::MatrixNode();
+		node ->_val = std::to_string(outgroup);
+		_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1] = node;
+	}
 }
 
 std::string Alignment::FindLargestScoreInTable() const
