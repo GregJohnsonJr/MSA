@@ -261,6 +261,8 @@ void Alignment::TransformMatrix() const
 	std::pair<int, int> smallestValue = FindSmallestMatrixValue(); // the value to transform
 	int rowLength = _distanceMatrix->matrix[0].size();
 	int columnLength = _distanceMatrix->matrix.size();
+	if(columnLength < 2)
+		return;
 	float outgroupOfFirstValue = std::stof(_distanceMatrix->matrix[smallestValue.first][rowLength - 1]->_val);
 	float outgroupOfSecondValue = std::stof(_distanceMatrix->matrix[smallestValue.second][rowLength - 1]->_val);
 	float valOfIndexes =  std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
@@ -274,16 +276,23 @@ void Alignment::TransformMatrix() const
 	float newValue = (valOfIndexes - outgroupOfFirstValue - outgroupOfSecondValue)/(float)(2.0);
 	newValue = newValue + averageOutGroup;
 	_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val = std::to_string(newValue);
-	_distanceMatrix->matrix.erase(_distanceMatrix->matrix.begin() + smallestValue.second);
-	for(int i = 0; i < _distanceMatrix->matrix[0].size(); i++)
-	{
-		_distanceMatrix->matrix[0].erase(_distanceMatrix->matrix[0].begin() + smallestValue.second);
-	}
-	for(int i = 1; i < _distanceMatrix->matrix[0].size(); i++)
+	for(int i = 1; i < columnLength; i++)
 	{
 		//Replace all values in column
-		_distanceMatrix->matrix[i][smallestValue.first]
+		if(_distanceMatrix->matrix[smallestValue.first][i] == nullptr || _distanceMatrix->matrix[i][smallestValue.second] == nullptr)
+			continue;
+		float newVal = std::stof(_distanceMatrix->matrix[smallestValue.first][i]->_val) + std::stof(_distanceMatrix->matrix[i][smallestValue.second]->_val)
+			- std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
+		newVal/=(float)2;
+		_distanceMatrix->matrix[smallestValue.first][i]->_val = std::to_string(newVal);
 	}
+	
+	_distanceMatrix->matrix.erase(_distanceMatrix->matrix.begin() + smallestValue.second);
+	for(int i = 0; i < columnLength - 1; i++)
+	{
+		_distanceMatrix->matrix[i].erase(_distanceMatrix->matrix[i].begin() + smallestValue.second);
+	}
+	CreateOutGroups(); //indirect recursion 
 	//Transform other values
 	
 }
