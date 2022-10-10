@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Alignment.cpp" />
+    <ClCompile Include="ConsensusSequenceCreator.cpp" />
     <ClCompile Include="DNADatabase.cpp" />
     <ClCompile Include="IOSequenceController.cpp" />
     <ClCompile Include="Matrix.cpp" />
@@ -136,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alignment.h" />
+    <ClInclude Include="ConsensusSequenceCreator.h" />
     <ClInclude Include="DNADatabase.h" />
     <ClInclude Include="IOSequenceController.h" />
     <ClInclude Include="Matrix.h" />

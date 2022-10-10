@@ -30,11 +30,12 @@ public:
 	void TransformMatrix();
 	void ConsensusSequence();
 	void GenerateNewickTree();
-	void FindSmallestMatrixValue(Matrix*);
+	std::pair<int,int> FindSmallestMatrixValue() const; // returns index
 	std::string FindLargestScoreInTable() const;
 private:
 	DNADatabase _sequenceFile;
 	std::vector<DNADatabase::Sequences> _sequences;
+	std::vector<std::string> alignedSequences;
 	std::ifstream _outputFile;
 	std::unordered_map<std::string, std::pair<int, std::string>> _alignmentScores;
 	std::string _consensusSequence;

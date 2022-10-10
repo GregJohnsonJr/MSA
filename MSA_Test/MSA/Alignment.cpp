@@ -255,6 +255,53 @@ void Alignment::CreateOutGroups() const
 	}
 }
 
+void Alignment::TransformMatrix()
+{
+	std::pair<int, int> smallestValue = FindSmallestMatrixValue(); // the value to transform
+	int rowLength = _distanceMatrix->matrix[0].size();
+	int columnLength = _distanceMatrix->matrix.size();
+	float outgroupOfFirstValue = std::stof(_distanceMatrix->matrix[smallestValue.first][rowLength - 1]->_val);
+	float outgroupOfSecondValue = std::stof(_distanceMatrix->matrix[smallestValue.second][rowLength - 1]->_val);
+	float valOfIndexes =  std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
+	float averageOutGroup = 0.0;
+	for(int i = 0; i < _distanceMatrix->matrix.size(); i++)
+	{
+		averageOutGroup += std::stof(_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1]->_val);
+	}
+	averageOutGroup = averageOutGroup / (float)(_distanceMatrix->matrix.size() - 1);
+	//(Dab - dAD - dBD) /2 + dD(average of all outgroups)
+	float newValue = (valOfIndexes - outgroupOfFirstValue - outgroupOfSecondValue)/(float)(2.0);
+	newValue = newValue + averageOutGroup;
+	
+}
+
+std::pair<int, int> Alignment::FindSmallestMatrixValue() const // make unit testable later if possible
+{
+	float val = 0.0;
+	std::pair<int, int> smallestValIndex(-1,-1);
+	for(int i = 1; i < _distanceMatrix->matrix.size() ; i++)
+	{
+		for(int j = 1; j < _distanceMatrix->matrix[0].size() - 1; j++) // -1 to avoid outgroups
+		{
+			if(_distanceMatrix->matrix[i][j] == nullptr)
+				continue;
+			float newValue = std::stof(_distanceMatrix->matrix[i][j]->_val);
+			if(smallestValIndex.first == -1)
+			{
+				val = newValue;
+				smallestValIndex = std::pair<int,int>(i,j);
+				continue;
+			}
+			if(val > newValue) // the smallest value
+			{
+				val = newValue;
+				smallestValIndex = std::pair<int,int>(i,j);
+			}
+		}
+	}
+	return smallestValIndex;
+}
+
 std::string Alignment::FindLargestScoreInTable() const
 {
 	std::string key = " ";
