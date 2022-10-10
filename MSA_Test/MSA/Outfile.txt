@@ -1,0 +1,7 @@
+Sequences: 
+-ATAGCTGTA
+-ATAGCTGTA
+Consensus Sequence: 
+-ATAGCTGTA
+Newick tree file: 
+(sequence_1,sequence_2)

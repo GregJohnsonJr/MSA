@@ -149,6 +149,7 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 	else
 	{
 		std::string key = seqOne + "+" + seqTwo;
+		std::reverse(alignment.begin(), alignment.end());
 		if (!(_alignmentScores.find(key) == _alignmentScores.end())) // if we do have the key
 		{
 			if(_alignmentScores[key].first < score) //It means this is a better alignment
@@ -171,7 +172,7 @@ void Alignment::MSA()
 			Matrix::MatrixNode* node = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
 			ScoreSequence(node, 0, "", false, _sequences[i].name, _sequences[j].name);
 			std::string key = _sequences[i].name + "+" + _sequences[j].name;
-			std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
+			//std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
 		}
 	}
 	CreateGuideTree();
@@ -224,6 +225,7 @@ void Alignment::CreateGuideTree()
 	//GUIDE TREE CREATED!!!!
 	// Jukes cantor then create outgroups
 	//OutGroups
+	_alignmentScores.clear(); // To make room for new alignments
 	CreateOutGroups();
 	
 }
@@ -237,7 +239,7 @@ float Alignment::ApproximateGuideTree(float val) const
 	return newValue;
 }
 
-void Alignment::CreateOutGroups() const
+void Alignment::CreateOutGroups() 
 {
 	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
 	{
@@ -248,7 +250,9 @@ void Alignment::CreateOutGroups() const
 				continue;
 			outgroup += std::stof(_distanceMatrix->matrix[i][j]->_val);
 		}
-		outgroup = outgroup/(float)((_distanceMatrix->matrix.size() - 1) - 2);
+		int divideSize = (_distanceMatrix->matrix.size() - 1) - 2;
+		divideSize = std::max(divideSize, 1);
+		outgroup = outgroup/(float)divideSize;
 		Matrix::MatrixNode* node = new Matrix::MatrixNode();
 		node ->_val = std::to_string(outgroup);
 		_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1] = node;
@@ -256,16 +260,24 @@ void Alignment::CreateOutGroups() const
 	TransformMatrix();
 }
 
-void Alignment::TransformMatrix() const
+void Alignment::TransformMatrix() 
 {
 	std::pair<int, int> smallestValue = FindSmallestMatrixValue(); // the value to transform
 	int rowLength = _distanceMatrix->matrix[0].size();
 	int columnLength = _distanceMatrix->matrix.size();
-	if(columnLength < 2)
+
+	
+	if(columnLength <= 2)
+	{
+		OutputInformation();
 		return;
+	}
+	std::string columnSequence = _distanceMatrix->matrix[smallestValue.first][0]->_val;
+	std::string columnSequenceTwo = _distanceMatrix->matrix[0][smallestValue.second]->_val;
 	float outgroupOfFirstValue = std::stof(_distanceMatrix->matrix[smallestValue.first][rowLength - 1]->_val);
 	float outgroupOfSecondValue = std::stof(_distanceMatrix->matrix[smallestValue.second][rowLength - 1]->_val);
 	float valOfIndexes =  std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
+
 	float averageOutGroup = 0.0;
 	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
 	{
@@ -292,10 +304,77 @@ void Alignment::TransformMatrix() const
 	{
 		_distanceMatrix->matrix[i].erase(_distanceMatrix->matrix[i].begin() + smallestValue.second);
 	}
+	DNADatabase::Sequences seq = _sequenceFile.sequenceMap.at(columnSequence); // need a function for this
+	DNADatabase::Sequences seq2 = _sequenceFile.sequenceMap.at(columnSequenceTwo);
+	std::vector<std::string> seqVector= seq.SequenceToVector();
+	std::vector<std::string> seqVector2 = seq2.SequenceToVector();
+	Matrix::MatrixNode* node = GlobalAlignment(seqVector, seqVector2);
+	ScoreSequence(node, 0, "", false, seq.name, seq2.name);
+	if(initialSeqName == " ") // only the first one
+	{
+		initialSeqName = columnSequenceTwo;
+		Matrix::MatrixNode* node2 = GlobalAlignment(seqVector2, seqVector);
+		ScoreSequence(node, 0, "", false, seq2.name, seq.name);
+		std::string keyN = seq2.name + "+" + seq.name;
+		//std::cout << "Alignment: " << _alignmentScores[keyN].second << std::endl;
+		alignedSequences.emplace_back(_alignmentScores[keyN].second);
+		_consensusSequence = _alignmentScores[keyN].second;
+	}
+	std::string key = seq.name + "+" + seq2.name;
+	//std::cout << "Alignment: " << _alignmentScores[key].second << std::endl;
+	alignedSequences.emplace_back(_alignmentScores[key].second);
+	ConsensusSequence(_alignmentScores[key].second);
+	GenerateNewickTree(std::pair<std::string, std::string>(seq.name, seq2.name));
 	CreateOutGroups(); //indirect recursion 
 	//Transform other values
 	
 }
+
+void Alignment::ConsensusSequence(std::string other)
+{
+	ConsensusSequenceCreator creator;
+	_consensusSequence = creator.ConsensusSequenceGenerator(_consensusSequence, other);
+}
+
+void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairString)
+{
+	bool hasFirst = false, hasSecond = false;
+	std::string first = pairString.first;
+	std::string second = pairString.second;
+	for(int i = 0; i < containedTrees.size(); i++)
+	{
+		if(first == containedTrees[i])
+		{
+			hasFirst = true;
+		}
+		if(second == containedTrees[i])
+		{
+			hasSecond = true;
+		}
+	}
+	if( !hasFirst && !hasSecond)
+	{
+		newWick.insert(0, "(");
+		newWick.append(first).append(",").append(second).append(")");
+		containedTrees.emplace_back(first);
+		containedTrees.emplace_back(second);
+	}
+	else if(!hasFirst)
+	{
+		newWick.insert(0, "(");
+		newWick.append(first).append(")");
+		containedTrees.emplace_back(first);
+	}
+	else if(!hasSecond)
+	{
+		newWick.insert(0, "(");
+		newWick.append(second).append(")");
+		containedTrees.emplace_back(second);
+	}
+	std::cout << newWick << std::endl;
+	
+}
+
 
 std::pair<int, int> Alignment::FindSmallestMatrixValue() const // make unit testable later if possible
 {
@@ -342,4 +421,19 @@ std::string Alignment::FindLargestScoreInTable() const
 		}
 	}
 	return key;
+}
+
+void Alignment::OutputInformation()
+{
+	_outputFile << "Sequences: " << std::endl;
+	for(auto i : alignedSequences)
+	{
+		_outputFile << i << std::endl;
+	}
+	_outputFile << std::endl;
+	_outputFile << "Consensus Sequence: " << std::endl;
+	_outputFile << _consensusSequence << std::endl;
+	_outputFile << std::endl;
+	_outputFile << "Newick tree file: " <<std::endl;
+	_outputFile << newWick << std::endl;
 }

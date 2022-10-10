@@ -60,7 +60,6 @@ public:
             else
                 conensusString.append(languageInterpreter[eqString]);
         }
-        conensusString.append(std::string(addGaps, '-'));
         return conensusString;
     }
    void InitInterpreter()

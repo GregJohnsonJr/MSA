@@ -41,6 +41,6 @@ int main()
         Pam pamTemp(path);
         pam = pamTemp;
     }
-    Alignment alignment(gapScore, mismatchScore, matchScore, afflineGapScore, dna, isProtein, pam);
+    Alignment alignment(gapScore, mismatchScore, matchScore, afflineGapScore, dna, isProtein, pam, outfilePath);
     alignment.MSA();
 }
