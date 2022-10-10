@@ -27,7 +27,7 @@ public:
 	void CreateGuideTree();// Think i need a rebuild tree function
 	float ApproximateGuideTree(float) const;
 	void CreateOutGroups() const;
-	void TransformMatrix();
+	void TransformMatrix() const;
 	void ConsensusSequence();
 	void GenerateNewickTree();
 	std::pair<int,int> FindSmallestMatrixValue() const; // returns index

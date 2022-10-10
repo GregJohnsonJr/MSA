@@ -253,9 +253,10 @@ void Alignment::CreateOutGroups() const
 		node ->_val = std::to_string(outgroup);
 		_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1] = node;
 	}
+	TransformMatrix();
 }
 
-void Alignment::TransformMatrix()
+void Alignment::TransformMatrix() const
 {
 	std::pair<int, int> smallestValue = FindSmallestMatrixValue(); // the value to transform
 	int rowLength = _distanceMatrix->matrix[0].size();
@@ -264,7 +265,7 @@ void Alignment::TransformMatrix()
 	float outgroupOfSecondValue = std::stof(_distanceMatrix->matrix[smallestValue.second][rowLength - 1]->_val);
 	float valOfIndexes =  std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
 	float averageOutGroup = 0.0;
-	for(int i = 0; i < _distanceMatrix->matrix.size(); i++)
+	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
 	{
 		averageOutGroup += std::stof(_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1]->_val);
 	}
@@ -272,6 +273,18 @@ void Alignment::TransformMatrix()
 	//(Dab - dAD - dBD) /2 + dD(average of all outgroups)
 	float newValue = (valOfIndexes - outgroupOfFirstValue - outgroupOfSecondValue)/(float)(2.0);
 	newValue = newValue + averageOutGroup;
+	_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val = std::to_string(newValue);
+	_distanceMatrix->matrix.erase(_distanceMatrix->matrix.begin() + smallestValue.second);
+	for(int i = 0; i < _distanceMatrix->matrix[0].size(); i++)
+	{
+		_distanceMatrix->matrix[0].erase(_distanceMatrix->matrix[0].begin() + smallestValue.second);
+	}
+	for(int i = 1; i < _distanceMatrix->matrix[0].size(); i++)
+	{
+		//Replace all values in column
+		_distanceMatrix->matrix[i][smallestValue.first]
+	}
+	//Transform other values
 	
 }
 
