@@ -24,17 +24,10 @@ public:
             addGaps = other.size() - length;
         }
         std::string conensusString = "";
-        int offset = 0;
         for(int i = 0; i < length; i++)
         {
             std::string temp = std::string(1,other[i]);
-            std::string temp2 = std::string(1,seq[i - offset]);
-            if(temp == "[")
-            {
-                temp.append(other.begin() +(i + 1), other.begin() + (i + 4));
-                i+=4;
-                offset +=4;
-            }
+            std::string temp2 = std::string(1,seq[i]);
             if(temp == temp2)
             {
                 conensusString.append(temp);
@@ -62,45 +55,48 @@ public:
         }
         return conensusString;
     }
-   void InitInterpreter()
+    void InitInterpreter()
     {
         languageInterpreter.insert({"AG", "R"}); //purinines
-        languageInterpreter.insert({"AC", "[AC]"});
-        languageInterpreter.insert({"TG", "[TG]"});
+        languageInterpreter.insert({"AC", "M"});
+        languageInterpreter.insert({"TG", "K"});
         languageInterpreter.insert({"TC", "Y"}); //pyrimidinies
-        languageInterpreter.insert({"GC", "[GC]"});
+        languageInterpreter.insert({"GC", "S"});
         //Same bases will just be equal to themselves
         languageInterpreter.insert({"RG", "G"});
         languageInterpreter.insert({"RA", "A"});
         languageInterpreter.insert({"YT", "T"});
         languageInterpreter.insert({"YC", "C"});
-        languageInterpreter.insert({"[AC]C", "C"});
-        languageInterpreter.insert({"[AC]A", "A"});
-        languageInterpreter.insert({"[AC]G", "R"});
-        languageInterpreter.insert({"[AC]T", "Y"});
-        languageInterpreter.insert({"[AC]R", "A"});
-        languageInterpreter.insert({"[AC]Y", "C"});
+        languageInterpreter.insert({"YR", "N"});
+        languageInterpreter.insert({"MC", "C"});
+        languageInterpreter.insert({"MA", "A"});
+        languageInterpreter.insert({"MG", "V"});
+        languageInterpreter.insert({"MT", "H"});
+        languageInterpreter.insert({"MR", "A"});
+        languageInterpreter.insert({"MY", "C"});
+        languageInterpreter.insert({"BD", "K"});
+        
+        languageInterpreter.insert({"BD", "K"});
         //
-        languageInterpreter.insert({"[TG]C", "Y"});
-        languageInterpreter.insert({"[TG]A", "R"});
-        languageInterpreter.insert({"[TG]G", "G"});
-        languageInterpreter.insert({"[TG]T", "T"});
-        languageInterpreter.insert({"[TG]R", "R"});
-        languageInterpreter.insert({"[TG]Y", "T"});
+        languageInterpreter.insert({"KC", "B"});
+        languageInterpreter.insert({"KA", "D"});
+        languageInterpreter.insert({"KG", "G"});
+        languageInterpreter.insert({"KT", "T"});
+        languageInterpreter.insert({"KR", "G"});
+        languageInterpreter.insert({"KY", "T"});
         //
-        languageInterpreter.insert({"[GC]C", "C"});
-        languageInterpreter.insert({"[GC]A", "R"});
-        languageInterpreter.insert({"[GC]G", "G"});
-        languageInterpreter.insert({"[GC]T", "Y"});
-        languageInterpreter.insert({"[GC]R", "R"});
-        languageInterpreter.insert({"[GC]Y", "C"});
+        languageInterpreter.insert({"SC", "C"});
+        languageInterpreter.insert({"SA", "V"});
+        languageInterpreter.insert({"SG", "G"});
+        languageInterpreter.insert({"ST", "B"});
+        languageInterpreter.insert({"SR", "V"});
+        languageInterpreter.insert({"SY", "C"});
         //
         languageInterpreter.insert({"-G", "G"});
         languageInterpreter.insert({"-A", "A"});
         languageInterpreter.insert({"-T", "T"});
         languageInterpreter.insert({"-C", "C"});
     }
-
 private:
     std::vector<std::vector<std::string>> consensusValues;
     std::unordered_map<std::string, std::string> languageInterpreter;

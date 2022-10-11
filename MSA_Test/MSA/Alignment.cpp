@@ -336,7 +336,7 @@ void Alignment::ConsensusSequence(std::string other)
 	_consensusSequence = creator.ConsensusSequenceGenerator(_consensusSequence, other);
 }
 
-void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairString)
+void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairString) // I have to prepare for the case where another sequence may create a pair...
 {
 	bool hasFirst = false, hasSecond = false;
 	std::string first = pairString.first;
