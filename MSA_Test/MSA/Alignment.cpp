@@ -358,34 +358,34 @@ void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairStrin
 			hasSecond = true;
 		}
 	}
+	std::string val;
 	if( !hasFirst && !hasSecond)
 	{
-		std::string val;
-		val.insert(0, "(");
-		val.append(first).append(": " + tDist).append(",").append(second + ": " + tDist).append(")");
-		_treeConstructionPath.emplace_back(val);
+		val = "(" + first + ": " + tDist + "," + second + ": " + tDist + ")";
 		containedTrees.emplace_back(first);
 		containedTrees.emplace_back(second);
 	}
 	else if(!hasFirst)
 	{
-		std::string val;
-		val.insert(0, "(");
-		val.append(first + ": " + tDist).append(")");
-		_treeConstructionPath.emplace_back(val);
+		val = "(" + first + ": " + tDist + ")";
 		containedTrees.emplace_back(first);
 	}
 	else if(!hasSecond)
 	{
-		std::string val;
-		val.insert(0, "(");
-		val.append(second + ": " + tDist).append(")");
-		_treeConstructionPath.emplace_back(val);
+		val = "(" + second + ": " + tDist + ")";
 		containedTrees.emplace_back(second);
 	}
-	std::cout << newWick << std::endl;
-	
+	val.erase(std::remove_if( val.begin(),
+									val.end(),
+									[](auto ch)
+									{
+										return (ch == '\n' ||
+												ch == '\r'); 
+									}),
+					val.end() );
+	_treeConstructionPath.emplace_back(val);
 }
+
 
 
 std::pair<int, int> Alignment::FindSmallestMatrixValue() const // make unit testable later if possible
