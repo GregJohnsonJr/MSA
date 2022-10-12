@@ -39,6 +39,7 @@ public:
 	void ConsensusSequence(std::string);
 	void GenerateNewickTree(std::pair<std::string, std::string>);
 	void OutputInformation();
+	void ConstructNewickTree();
 	std::pair<int,int> FindSmallestMatrixValue() const; // returns index
 	std::string FindLargestScoreInTable() const;
 private:
@@ -55,5 +56,7 @@ private:
 	std::string initialSeqName =" ";
 	int _gapScore, _matchScore, _mismatchScore, _afflineGapScore;
 	bool _isProtein;
+	std::vector<std::string> _treeConstructionPath;
+	std::unordered_map<std::string, float> _transformedDistances;
 };
 

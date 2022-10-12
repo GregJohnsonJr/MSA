@@ -310,6 +310,7 @@ void Alignment::TransformMatrix()
 	std::vector<std::string> seqVector2 = seq2.SequenceToVector();
 	Matrix::MatrixNode* node = GlobalAlignment(seqVector, seqVector2);
 	ScoreSequence(node, 0, "", false, seq.name, seq2.name);
+	bool isFirst = false;
 	if(initialSeqName == " ") // only the first one
 	{
 		initialSeqName = columnSequenceTwo;
@@ -319,8 +320,11 @@ void Alignment::TransformMatrix()
 		//std::cout << "Alignment: " << _alignmentScores[keyN].second << std::endl;
 		alignedSequences.emplace_back(_alignmentScores[keyN].second);
 		_consensusSequence = _alignmentScores[keyN].second;
+		isFirst = true;
 	}
+	
 	std::string key = seq.name + "+" + seq2.name;
+	_transformedDistances.insert({key, newValue});
 	//std::cout << "Alignment: " << _alignmentScores[key].second << std::endl;
 	alignedSequences.emplace_back(_alignmentScores[key].second);
 	ConsensusSequence(_alignmentScores[key].second);
@@ -341,6 +345,8 @@ void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairStrin
 	bool hasFirst = false, hasSecond = false;
 	std::string first = pairString.first;
 	std::string second = pairString.second;
+	std::string key = first + "+" + second;
+	std::string tDist = std::to_string(_transformedDistances[key]);
 	for(int i = 0; i < containedTrees.size(); i++)
 	{
 		if(first == containedTrees[i])
@@ -354,21 +360,27 @@ void Alignment::GenerateNewickTree(std::pair<std::string, std::string> pairStrin
 	}
 	if( !hasFirst && !hasSecond)
 	{
-		newWick.insert(0, "(");
-		newWick.append(first).append(",").append(second).append(")");
+		std::string val;
+		val.insert(0, "(");
+		val.append(first).append(": " + tDist).append(",").append(second + ": " + tDist).append(")");
+		_treeConstructionPath.emplace_back(val);
 		containedTrees.emplace_back(first);
 		containedTrees.emplace_back(second);
 	}
 	else if(!hasFirst)
 	{
-		newWick.insert(0, "(");
-		newWick.append(first).append(")");
+		std::string val;
+		val.insert(0, "(");
+		val.append(first + ": " + tDist).append(")");
+		_treeConstructionPath.emplace_back(val);
 		containedTrees.emplace_back(first);
 	}
 	else if(!hasSecond)
 	{
-		newWick.insert(0, "(");
-		newWick.append(second).append(")");
+		std::string val;
+		val.insert(0, "(");
+		val.append(second + ": " + tDist).append(")");
+		_treeConstructionPath.emplace_back(val);
 		containedTrees.emplace_back(second);
 	}
 	std::cout << newWick << std::endl;
@@ -435,5 +447,16 @@ void Alignment::OutputInformation()
 	_outputFile << _consensusSequence << std::endl;
 	_outputFile << std::endl;
 	_outputFile << "Newick tree file: " <<std::endl;
+	ConstructNewickTree();
 	_outputFile << newWick << std::endl;
+}
+
+void Alignment::ConstructNewickTree()
+{
+	newWick.append(_treeConstructionPath[0]);
+	for(int i = 1; i < _treeConstructionPath.size(); i++)
+	{
+		newWick.insert(0, "(");
+		newWick.append("," + _treeConstructionPath[i] + ")");
+	}
 }
