@@ -3,6 +3,7 @@
 Matrix::MatrixNode* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string> arr2)//TODO Change chars to strings to account for negatives, Switch i and J value to fix location of next values
 {
 	Matrix* matrix = new Matrix(arr2.size() + 2, arr1.size() + 2);
+	largestLength = std::max({largestLength, (int)arr1.size(), (int)arr2.size()});
 	std::string firstSequence;
 	for (auto i : arr1)
 	{
@@ -104,10 +105,14 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 {
 	if(lastVal != nullptr)
 	{
+		if(lastVal->_top == nullptr && lastVal->_left == nullptr && lastVal->_middle == nullptr)
+		{
+			return ScoreSequence(nullptr, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+		}
 		std::string alignedVal = lastVal->_seqLetter;
 		if (lastVal->_parent == lastVal->_left || lastVal->_parent == lastVal->_top)
 		{
-			alignedVal = "-";
+			alignedVal = "-"; // Points at the 0,0 value
 		}
 		alignment.append(alignedVal);
 		if (lastVal->_top != nullptr &&  lastVal->_parent->_val == lastVal->_top->_val) // gap
@@ -318,6 +323,9 @@ void Alignment::TransformMatrix()
 		ScoreSequence(node, 0, "", false, seq2.name, seq.name);
 		std::string keyN = seq2.name + "+" + seq.name;
 		//std::cout << "Alignment: " << _alignmentScores[keyN].second << std::endl;
+		_alignmentScores[keyN].second = _alignmentScores[keyN].second.size() < largestLength ?
+			_alignmentScores[keyN].second.append(std::string(largestLength - _alignmentScores[keyN].second.size(), '-'))
+				:_alignmentScores[keyN].second;
 		alignedSequences.emplace_back(_alignmentScores[keyN].second);
 		_consensusSequence = _alignmentScores[keyN].second;
 		isFirst = true;
@@ -326,6 +334,9 @@ void Alignment::TransformMatrix()
 	std::string key = seq.name + "+" + seq2.name;
 	_transformedDistances.insert({key, newValue});
 	//std::cout << "Alignment: " << _alignmentScores[key].second << std::endl;
+	_alignmentScores[key].second = _alignmentScores[key].second.size() < largestLength ?
+		_alignmentScores[key].second.append(std::string(largestLength - _alignmentScores[key].second.size(), '-'))
+			:_alignmentScores[key].second;
 	alignedSequences.emplace_back(_alignmentScores[key].second);
 	ConsensusSequence(_alignmentScores[key].second);
 	GenerateNewickTree(std::pair<std::string, std::string>(seq.name, seq2.name));
@@ -444,6 +455,10 @@ void Alignment::OutputInformation()
 	}
 	_outputFile << std::endl;
 	_outputFile << "Consensus Sequence: " << std::endl;
+	if(_consensusSequence.size() < largestLength)
+	{
+		_consensusSequence.append(std::string(largestLength - _consensusSequence.size(), '-'));
+	}
 	_outputFile << _consensusSequence << std::endl;
 	_outputFile << std::endl;
 	_outputFile << "Newick tree file: " <<std::endl;

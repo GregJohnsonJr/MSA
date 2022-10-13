@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 class ConsensusSequenceCreator
 {
@@ -33,7 +34,7 @@ public:
                 conensusString.append(temp);
                 continue;
             }
-            if(temp == "_")
+            if(temp == "-")
             {
                 conensusString.append(temp2);
                 continue;
@@ -51,8 +52,14 @@ public:
                 conensusString.append(languageInterpreter[eqString]);
             }
             else
-                conensusString.append(languageInterpreter[eqString]);
+            {
+                std::string val = (languageInterpreter[eqString] == " " ? "-"
+                    : languageInterpreter[eqString]);
+                conensusString.append(languageInterpreter[eqString] == " " ? "-"
+                    : languageInterpreter[eqString]);
+            }
         }
+       
         return conensusString;
     }
     void InitInterpreter()
@@ -62,6 +69,7 @@ public:
         languageInterpreter.insert({"TG", "K"});
         languageInterpreter.insert({"TC", "Y"}); //pyrimidinies
         languageInterpreter.insert({"GC", "S"});
+        languageInterpreter.insert({"TA", "W"});
         //Same bases will just be equal to themselves
         languageInterpreter.insert({"RG", "G"});
         languageInterpreter.insert({"RA", "A"});
@@ -69,6 +77,10 @@ public:
         languageInterpreter.insert({"YC", "C"});
         languageInterpreter.insert({"YR", "N"});
        //
+        languageInterpreter.insert({"RT", "A"});
+        languageInterpreter.insert({"YA", "H"});
+        languageInterpreter.insert({"RC", "V"});
+        //
         
         languageInterpreter.insert({"BD", "N"});
         languageInterpreter.insert({"BA", "N"});

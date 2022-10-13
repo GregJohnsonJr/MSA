@@ -52,6 +52,7 @@ private:
 	std::unordered_map<std::string, std::pair<int, std::string>> _alignmentScores;
 	std::string _consensusSequence;
 	Matrix* _distanceMatrix = nullptr;
+	int largestLength = 0;
 	Pam _substitutionMatrix;
 	std::string initialSeqName =" ";
 	int _gapScore, _matchScore, _mismatchScore, _afflineGapScore;
