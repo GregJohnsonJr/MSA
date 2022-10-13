@@ -8,6 +8,10 @@
 #include "ConsensusSequenceCreator.h"
 #include <cmath>
 using namespace Matrices;
+
+/**
+ * Remover Pointers.... Causing memory leaks *sigh*
+ */
 class Alignment
 {
 public:
@@ -29,7 +33,7 @@ public:
 			_outputFile.open(filePath);
 		}
 	}
-	Matrix::MatrixNode* GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string>);
+	Matrix* GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string>);
 	void ScoreSequence(const Matrix::MatrixNode*, int, std::string, bool, std::string, std::string);
 	void MSA();
 	void CreateGuideTree();// Think i need a rebuild tree function

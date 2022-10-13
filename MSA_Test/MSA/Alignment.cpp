@@ -1,6 +1,6 @@
 #include "Alignment.h"
 
-Matrix::MatrixNode* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string> arr2)//TODO Change chars to strings to account for negatives, Switch i and J value to fix location of next values
+Matrix* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string> arr2)//TODO Change chars to strings to account for negatives, Switch i and J value to fix location of next values
 {
 	Matrix* matrix = new Matrix(arr2.size() + 2, arr1.size() + 2);
 	largestLength = std::max({largestLength, (int)arr1.size(), (int)arr2.size()});
@@ -98,7 +98,7 @@ Matrix::MatrixNode* Alignment::GlobalAlignment(const std::vector<std::string> ar
 	}
 	//std::string str = FindAlignmentPath(matrix); //Affline gaps are when we decrease gap scores as we continously gap
 	//osOutFile << str << std::endl;
-	return matrix->matrix[matrix->matrix.size() - 1][matrix->matrix[0].size() - 1]; // Returns last node
+	return matrix; // Returns last node
 }
 
 void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std::string alignment, bool isCurrentlyAfflineGap, std::string seqOne, std::string seqTwo) // The traceback + score
@@ -174,9 +174,11 @@ void Alignment::MSA()
 	{
 		for(int j = i + 1; j < _sequences.size(); j++) // start at the next sequence
 		{
-			Matrix::MatrixNode* node = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
+			Matrix* matrix = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
+			Matrix::MatrixNode* node = matrix->matrix[matrix->matrix.size() - 1][matrix->matrix[0].size() - 1];
 			ScoreSequence(node, 0, "", false, _sequences[i].name, _sequences[j].name);
 			std::string key = _sequences[i].name + "+" + _sequences[j].name;
+			delete(matrix);
 			//std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
 		}
 	}
@@ -313,14 +315,17 @@ void Alignment::TransformMatrix()
 	DNADatabase::Sequences seq2 = _sequenceFile.sequenceMap.at(columnSequenceTwo);
 	std::vector<std::string> seqVector= seq.SequenceToVector();
 	std::vector<std::string> seqVector2 = seq2.SequenceToVector();
-	Matrix::MatrixNode* node = GlobalAlignment(seqVector, seqVector2);
+	Matrix* matrix = GlobalAlignment(seqVector, seqVector2); 
+	Matrix::MatrixNode* node = matrix->matrix[matrix->matrix.size() - 1][matrix->matrix[0].size() - 1];
 	ScoreSequence(node, 0, "", false, seq.name, seq2.name);
+	delete(matrix);
 	bool isFirst = false;
 	if(initialSeqName == " ") // only the first one
 	{
 		initialSeqName = columnSequenceTwo;
-		Matrix::MatrixNode* node2 = GlobalAlignment(seqVector2, seqVector);
-		ScoreSequence(node, 0, "", false, seq2.name, seq.name);
+		Matrix* mat2 = GlobalAlignment(seqVector, seqVector2); 
+		Matrix::MatrixNode* node2 = mat2->matrix[mat2->matrix.size() - 1][mat2->matrix[0].size() - 1];
+		ScoreSequence(node2, 0, "", false, seq2.name, seq.name);
 		std::string keyN = seq2.name + "+" + seq.name;
 		//std::cout << "Alignment: " << _alignmentScores[keyN].second << std::endl;
 		_alignmentScores[keyN].second = _alignmentScores[keyN].second.size() < largestLength ?
@@ -329,6 +334,7 @@ void Alignment::TransformMatrix()
 		alignedSequences.emplace_back(_alignmentScores[keyN].second);
 		_consensusSequence = _alignmentScores[keyN].second;
 		isFirst = true;
+		delete(mat2);
 	}
 	
 	std::string key = seq.name + "+" + seq2.name;

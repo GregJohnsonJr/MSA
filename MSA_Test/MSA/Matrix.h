@@ -11,7 +11,7 @@ namespace Matrices
 		struct MatrixNode
 		{
 		public:
-			MatrixNode() {}
+			MatrixNode() {} // 48bytes * 3600 
 			MatrixNode(std::string val, MatrixNode parent, std::string seqLetter)
 			{
 				this->_val = val;
