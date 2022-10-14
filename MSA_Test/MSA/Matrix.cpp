@@ -3,7 +3,7 @@
 #include <cmath>
 namespace Matrices
 {
-	bool Matrix::SetMatrixValueAtPosition(int y, int x, MatrixNode* node)
+	bool Matrix::SetMatrixValueAtPosition(int y, int x, MatrixNode node)
 	{
 		if (matrix.size() < y || matrix[0].size() < x)
 			return false;
@@ -16,16 +16,16 @@ namespace Matrices
 		{
 			for (int j = 0; j < matrix[0].size(); j++)
 			{
-				if (matrix[i][j] == nullptr)
-				{
-					MatrixNode* node = new MatrixNode();
-					matrix[i][j] = node;
-				}
-				std::string val = matrix[i][j]->_val;
+				// if (matrix[i][j] != MatrixNode())
+				// {
+				// 	MatrixNode node = MatrixNode();
+				// 	matrix[i][j] = node;
+				// }
+				std::string val = matrix[i][j]._val;
 				if (val == "")
 				{
 					val = "0";
-					matrix[i][j]->_val = val;
+					matrix[i][j]._val = val;
 				}
 				//	std::cout << val << std::string(4 - val.length(),' ');
 			}

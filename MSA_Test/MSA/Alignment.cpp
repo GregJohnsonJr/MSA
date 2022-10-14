@@ -1,8 +1,8 @@
 #include "Alignment.h"
 
-Matrix* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string> arr2)//TODO Change chars to strings to account for negatives, Switch i and J value to fix location of next values
+Matrix Alignment::GlobalAlignment(const std::vector<std::string> arr1, const std::vector<std::string> arr2)//TODO Change chars to strings to account for negatives, Switch i and J value to fix location of next values
 {
-	Matrix* matrix = new Matrix(arr2.size() + 2, arr1.size() + 2);
+	Matrix matrix(arr2.size() + 2, arr1.size() + 2);
 	largestLength = std::max({largestLength, (int)arr1.size(), (int)arr2.size()});
 	std::string firstSequence;
 	for (auto i : arr1)
@@ -11,89 +11,78 @@ Matrix* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const st
 	}
 	// Fill in  matrix
 	
-	matrix->SetMatrixValueAtPosition(1,1, new Matrix::MatrixNode());
-	for (int i = 2; i < matrix->matrix[0].size(); i++)
+	//matrix.SetMatrixValueAtPosition(1,1, new Matrix::MatrixNode());
+	for (int i = 2; i < matrix.matrix[0].size(); i++)
 	{
-		Matrix::MatrixNode* node = new Matrix::MatrixNode();
-		node->_val = arr1[i - 2];
-		Matrix::MatrixNode* node2 = new Matrix::MatrixNode();
-		node2->_val = std::to_string((i - 1) * _gapScore);
-		matrix->SetMatrixValueAtPosition(0, i, node);
-		matrix->SetMatrixValueAtPosition(1, i, node2);
-		node2->_parent = matrix->matrix[1][i - 1];
-		node2->_left = matrix->matrix[1][i - 1];
-		node2->_seqLetter = arr2[0];
+		Matrix::MatrixNode node;
+		node._val = arr1[i - 2];
+		Matrix::MatrixNode node2;
+		node2._val = std::to_string((i - 1) * _gapScore);
+		matrix.SetMatrixValueAtPosition(0, i, node);
+		matrix.SetMatrixValueAtPosition(1, i, node2);
+		node2._seqLetter = arr2[0];
 	}
-	for (int i = 2; i < matrix->matrix.size(); i++)
+	for (int i = 2; i < matrix.matrix.size(); i++)
 	{
-		Matrix::MatrixNode* node = new Matrix::MatrixNode();
-		node->_val = arr2[i - 2];
-		Matrix::MatrixNode* node2 = new Matrix::MatrixNode();
-		node2->_val = std::to_string((i - 1) * _gapScore);
-		matrix->SetMatrixValueAtPosition(i, 0, node);
-		matrix->SetMatrixValueAtPosition(i, 1, node2);
-		node2->_parent = matrix->matrix[i - 1][1];
-		node2->_left = matrix->matrix[i - 1][1];
-		node2->_seqLetter = arr2[i - 2];
+		Matrix::MatrixNode node;
+		node._val = arr2[i - 2];
+		Matrix::MatrixNode node2;
+		node2._val = std::to_string((i - 1) * _gapScore);
+		matrix.SetMatrixValueAtPosition(i, 0, node);
+		matrix.SetMatrixValueAtPosition(i, 1, node2);
+		node2._seqLetter = arr2[i - 2];
 	}
-	matrix->matrix[1][1]->_seqLetter = matrix->matrix[2][0]->_val;
-	matrix->DisplayMatrix();
+	matrix.matrix[1][1]._seqLetter = matrix.matrix[2][0]._val;
+	matrix.DisplayMatrix();
 	
-	for (int i = 2; i < matrix->matrix.size(); i++) //y
+	for (int i = 2; i < matrix.matrix.size(); i++) //y
 	{
-		for (int j = 2; j < matrix->matrix[0].size(); j++)//x
+		for (int j = 2; j < matrix.matrix[0].size(); j++)//x
 		{
-			Matrix::MatrixNode* node = matrix->matrix[i][j];
-			std::string topLetter = matrix->matrix[0][j]->_val;
-			std::string otherSeqLetter = matrix->matrix[i][0]->_val;
-			int topVal = std::stoi(matrix->matrix[i - 1][j]->_val);
-			int leftVal = std::stoi(matrix->matrix[i][j - 1]->_val);
-			int middleVal = std::stoi(matrix->matrix[i - 1][j - 1]->_val);
-			node->_left = matrix->matrix[i][j - 1];
-			node->_middle = matrix->matrix[i - 1][j - 1];
-			node->_top = matrix->matrix[i - 1][j];
+			Matrix::MatrixNode node = matrix.matrix[i][j];
+			Matrix::MatrixNode leftNode = matrix.matrix[i][j - 1];
+			std::string topLetter = matrix.matrix[0][j]._val;
+			std::string otherSeqLetter = matrix.matrix[i][0]._val;
+			int topVal = std::stoi(matrix.matrix[i - 1][j]._val);
+			int leftVal = std::stoi(matrix.matrix[i][j - 1]._val);
+			int middleVal = std::stoi(matrix.matrix[i - 1][j - 1]._val);
+			Matrix::MatrixNode middleNode = matrix.matrix[i - 1][j - 1];
+			Matrix::MatrixNode topNode = matrix.matrix[i - 1][j];
 			topVal += _gapScore;
 			leftVal += _gapScore;
 			middleVal = topLetter == otherSeqLetter ? middleVal + _matchScore : middleVal + _mismatchScore;
-			node->_seqLetter = otherSeqLetter;
+			node._seqLetter = otherSeqLetter;
 			if (topVal > leftVal)
 			{
 				if (topVal > middleVal)
 				{
-					node->_val = std::to_string(topVal);
-					node->_parent = matrix->matrix[i - 1][j];
-					node->isGap = true;
+					node._val = std::to_string(topVal);
 				}
 				else
 				{
-					node->_val = std::to_string(middleVal);
-					node->_parent = matrix->matrix[i - 1][j - 1];
+					node._val = std::to_string(middleVal);
 				}
 			}
 			else if (middleVal > leftVal)
 			{
 				if (middleVal > topVal)
 				{
-					node->_val = std::to_string(middleVal);
-					node->_parent = matrix->matrix[i - 1][j - 1];
+					node._val = std::to_string(middleVal);
 				}
 				else
 				{
-					node->_val = std::to_string(topVal);
-					node->_parent = matrix->matrix[i - 1][j];
-					node->isGap = true;
+					node._val = std::to_string(topVal);
 				}
 			}
 			else
 			{
-				node->_val = std::to_string(leftVal);
-				node->_parent = matrix->matrix[i][j - 1];
-				node->isGap = true;
+				node._val = std::to_string(leftVal);
 			}
 			if (_isProtein)
 			{
-				node->_val = _substitutionMatrix.GetSubstitutionValue(topLetter, otherSeqLetter);
+				node._val = _substitutionMatrix.GetSubstitutionValue(topLetter, otherSeqLetter);
 			}
+			matrix.matrix[i][j] = node;
 		}
 	}
 	//std::string str = FindAlignmentPath(matrix); //Affline gaps are when we decrease gap scores as we continously gap
@@ -101,21 +90,31 @@ Matrix* Alignment::GlobalAlignment(const std::vector<std::string> arr1, const st
 	return matrix; // Returns last node
 }
 
-void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std::string alignment, bool isCurrentlyAfflineGap, std::string seqOne, std::string seqTwo) // The traceback + score
+void Alignment::ScoreSequence(const Matrix matrix, int i, int j, int score, std::string alignment, bool isCurrentlyAfflineGap, std::string seqOne, std::string seqTwo) // The traceback + score
 {
-	if(lastVal != nullptr)
+	
+	
+	if(i > 1 && j >  1)
 	{
-		if(lastVal->_top == nullptr && lastVal->_left == nullptr && lastVal->_middle == nullptr)
-		{
-			return ScoreSequence(nullptr, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
-		}
-		std::string alignedVal = lastVal->_seqLetter;
-		if (lastVal->_parent == lastVal->_left || lastVal->_parent == lastVal->_top)
+		Matrix::MatrixNode lastVal = matrix.matrix[i][j];
+		Matrix::MatrixNode topNode =  matrix.matrix[i - 1][j];
+		Matrix::MatrixNode middleNode =  matrix.matrix[i - 1][j - 1];
+		Matrix::MatrixNode leftNode =  matrix.matrix[i ][j - 1];
+		int lastValue = (std::stoi(lastVal._val));
+		int middleValue = std::stoi(middleNode._val);
+		int leftValue = std::stoi(leftNode._val);
+		int topValue = std::stoi(topNode._val);
+		// if(lastVal->_top == nullptr && lastVal->_left == nullptr && lastVal->_middle == nullptr)
+		// {
+		// 	return ScoreSequence(nullptr, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+		// }
+		std::string alignedVal = lastVal._seqLetter;
+		if (lastValue + _gapScore == topValue || lastValue + _gapScore == leftValue)
 		{
 			alignedVal = "-"; // Points at the 0,0 value
 		}
 		alignment.append(alignedVal);
-		if (lastVal->_top != nullptr &&  lastVal->_parent->_val == lastVal->_top->_val) // gap
+		if (lastValue + _gapScore == topValue) // gap
 		{
 			if(isCurrentlyAfflineGap)
 			{
@@ -126,9 +125,9 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 				score = score + _afflineGapScore + _gapScore;
 				isCurrentlyAfflineGap = true;
 			}
-			ScoreSequence(lastVal->_top, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+			ScoreSequence(matrix, i - 1, j , score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
-		if (lastVal->_left != nullptr &&lastVal->_parent->_val == lastVal->_left->_val) // gap
+		if (lastValue + _gapScore == leftValue) // gap
 		{
 			if(isCurrentlyAfflineGap)
 			{
@@ -139,16 +138,21 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 				score = score + _afflineGapScore + _gapScore;
 				isCurrentlyAfflineGap = true;
 			}
-			ScoreSequence(lastVal->_left, score , alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+			ScoreSequence(matrix, i , j - 1 , score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
-		if (lastVal->_middle != nullptr &&lastVal->_parent->_val == lastVal->_middle->_val) //middle match
+		if (lastValue + _matchScore == middleValue) //middle match
 		{
 			isCurrentlyAfflineGap = false;
-			ScoreSequence(lastVal->_middle, score + _matchScore, alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+			ScoreSequence(matrix, i - 1 , j - 1 , score + _matchScore ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
-		if(lastVal->_parent == nullptr)
+		if (lastValue + _mismatchScore == middleValue) //middle match
 		{
-			ScoreSequence(lastVal->_parent, score, alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+			isCurrentlyAfflineGap = false;
+			ScoreSequence(matrix, i - 1 , j - 1 , score + _mismatchScore ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
+		}
+		if(i == 1 && j == 1)
+		{
+			ScoreSequence(matrix, i, j, score ,alignment, isCurrentlyAfflineGap, seqOne, seqTwo);
 		}
 	}
 	else
@@ -174,11 +178,10 @@ void Alignment::MSA()
 	{
 		for(int j = i + 1; j < _sequences.size(); j++) // start at the next sequence
 		{
-			Matrix* matrix = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
-			Matrix::MatrixNode* node = matrix->matrix[matrix->matrix.size() - 1][matrix->matrix[0].size() - 1];
-			ScoreSequence(node, 0, "", false, _sequences[i].name, _sequences[j].name);
+			Matrix matrix = GlobalAlignment(_sequences[i].SequenceToVector(), _sequences[j].SequenceToVector());
+			Matrix::MatrixNode node = matrix.matrix[matrix.matrix.size() - 1][matrix.matrix[0].size() - 1];
+			ScoreSequence(matrix,(int)matrix.matrix.size() - 1, (int)matrix.matrix[0].size() - 1, 0, "", false, _sequences[i].name, _sequences[j].name);
 			std::string key = _sequences[i].name + "+" + _sequences[j].name;
-			delete(matrix);
 			//std::cout << key <<" : " << " Best Score: " << _alignmentScores[key].first << " Best Alignment: " << _alignmentScores[key].second << std::endl;
 		}
 	}
@@ -187,13 +190,13 @@ void Alignment::MSA()
 
 void Alignment::CreateGuideTree()
 {
-	_distanceMatrix = new Matrix(_sequences.size() + 1, _sequences.size() + 2);
-	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	_distanceMatrix = Matrix(_sequences.size() + 1, _sequences.size() + 2);
+	for(int i = 1; i < _distanceMatrix.matrix.size(); i++)
 	{
-		_distanceMatrix->matrix[i][0] = new Matrix::MatrixNode();
-		_distanceMatrix->matrix[0][i] = new Matrix::MatrixNode();
-		_distanceMatrix->matrix[i][0]->_val = _sequences[i - 1].name;
-		_distanceMatrix->matrix[0][i]->_val = _sequences[i - 1].name;
+		_distanceMatrix.matrix[i][0] = Matrix::MatrixNode();
+		_distanceMatrix.matrix[0][i] = Matrix::MatrixNode();
+		_distanceMatrix.matrix[i][0]._val = _sequences[i - 1].name;
+		_distanceMatrix.matrix[0][i]._val = _sequences[i - 1].name;
 	}
 	std::unordered_map<std::string, float> distances;
 	for(const auto &i : _alignmentScores)
@@ -214,19 +217,19 @@ void Alignment::CreateGuideTree()
 		hammingDistance = (float)(length - matches)/(float)length;
 		distances.insert({i.first, hammingDistance});
 	}
-	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	for(int i = 1; i < _distanceMatrix.matrix.size(); i++)
 	{
-		std::string nameOne = _distanceMatrix->matrix[i][0]->_val;
-		for(int j = i + 1; j < _distanceMatrix->matrix[0].size() - 1; j++)
+		std::string nameOne = _distanceMatrix.matrix[i][0]._val;
+		for(int j = i + 1; j < _distanceMatrix.matrix[0].size() - 1; j++)
 		{
-			std::string currentName = _distanceMatrix->matrix[0][j]->_val;
+			std::string currentName = _distanceMatrix.matrix[0][j]._val;
 			std::string key = nameOne + "+" +(currentName);
 			float val = distances[key];
 			float approxVal = ApproximateGuideTree(val);
-			_distanceMatrix->matrix[i][j] = new Matrix::MatrixNode();
-			_distanceMatrix->matrix[i][j]->_val = std::to_string(approxVal);
-			_distanceMatrix->matrix[j][i] = new Matrix::MatrixNode();
-			_distanceMatrix->matrix[j][i]->_val = std::to_string(approxVal);
+			_distanceMatrix.matrix[i][j] =  Matrix::MatrixNode();
+			_distanceMatrix.matrix[i][j]._val = std::to_string(approxVal);
+			_distanceMatrix.matrix[j][i] =  Matrix::MatrixNode();
+			_distanceMatrix.matrix[j][i]._val = std::to_string(approxVal);
 		}
 	}
 	//GUIDE TREE CREATED!!!!
@@ -248,21 +251,21 @@ float Alignment::ApproximateGuideTree(float val) const
 
 void Alignment::CreateOutGroups() 
 {
-	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	for(int i = 1; i < _distanceMatrix.matrix.size(); i++)
 	{
 		float outgroup = 0.0;
-		for(int j = 1; j < _distanceMatrix->matrix[0].size(); j++)
+		for(int j = 1; j < _distanceMatrix.matrix[0].size(); j++)
 		{
-			if(_distanceMatrix->matrix[i][j] == nullptr)
-				continue;
-			outgroup += std::stof(_distanceMatrix->matrix[i][j]->_val);
+			 if(_distanceMatrix.matrix[i][j]._val.empty())
+			 	continue;
+			outgroup += std::stof(_distanceMatrix.matrix[i][j]._val);
 		}
-		int divideSize = (_distanceMatrix->matrix.size() - 1) - 2;
+		int divideSize = (_distanceMatrix.matrix.size() - 1) - 2;
 		divideSize = std::max(divideSize, 1);
 		outgroup = outgroup/(float)divideSize;
-		Matrix::MatrixNode* node = new Matrix::MatrixNode();
-		node ->_val = std::to_string(outgroup);
-		_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1] = node;
+		Matrix::MatrixNode node =  Matrix::MatrixNode();
+		node._val = std::to_string(outgroup);
+		_distanceMatrix.matrix[i][_distanceMatrix.matrix[0].size() - 1] = node;
 	}
 	TransformMatrix();
 }
@@ -270,8 +273,8 @@ void Alignment::CreateOutGroups()
 void Alignment::TransformMatrix() 
 {
 	std::pair<int, int> smallestValue = FindSmallestMatrixValue(); // the value to transform
-	int rowLength = _distanceMatrix->matrix[0].size();
-	int columnLength = _distanceMatrix->matrix.size();
+	int rowLength = _distanceMatrix.matrix[0].size();
+	int columnLength = _distanceMatrix.matrix.size();
 
 	
 	if(columnLength <= 2)
@@ -279,53 +282,52 @@ void Alignment::TransformMatrix()
 		OutputInformation();
 		return;
 	}
-	std::string columnSequence = _distanceMatrix->matrix[smallestValue.first][0]->_val;
-	std::string columnSequenceTwo = _distanceMatrix->matrix[0][smallestValue.second]->_val;
-	float outgroupOfFirstValue = std::stof(_distanceMatrix->matrix[smallestValue.first][rowLength - 1]->_val);
-	float outgroupOfSecondValue = std::stof(_distanceMatrix->matrix[smallestValue.second][rowLength - 1]->_val);
-	float valOfIndexes =  std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
+	std::string columnSequence = _distanceMatrix.matrix[smallestValue.first][0]._val;
+	std::string columnSequenceTwo = _distanceMatrix.matrix[0][smallestValue.second]._val;
+	float outgroupOfFirstValue = std::stof(_distanceMatrix.matrix[smallestValue.first][rowLength - 1]._val);
+	float outgroupOfSecondValue = std::stof(_distanceMatrix.matrix[smallestValue.second][rowLength - 1]._val);
+	float valOfIndexes =  std::stof(_distanceMatrix.matrix[smallestValue.first][smallestValue.second]._val);
 
 	float averageOutGroup = 0.0;
-	for(int i = 1; i < _distanceMatrix->matrix.size(); i++)
+	for(int i = 1; i < _distanceMatrix.matrix.size(); i++)
 	{
-		averageOutGroup += std::stof(_distanceMatrix->matrix[i][_distanceMatrix->matrix[0].size() - 1]->_val);
+		averageOutGroup += std::stof(_distanceMatrix.matrix[i][_distanceMatrix.matrix[0].size() - 1]._val);
 	}
-	averageOutGroup = averageOutGroup / (float)(_distanceMatrix->matrix.size() - 1);
+	averageOutGroup = averageOutGroup / (float)(_distanceMatrix.matrix.size() - 1);
 	//(Dab - dAD - dBD) /2 + dD(average of all outgroups)
 	float newValue = (valOfIndexes - outgroupOfFirstValue - outgroupOfSecondValue)/(float)(2.0);
 	newValue = newValue + averageOutGroup;
-	_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val = std::to_string(newValue);
+	_distanceMatrix.matrix[smallestValue.first][smallestValue.second]._val = std::to_string(newValue);
 	for(int i = 1; i < columnLength; i++)
 	{
 		//Replace all values in column
-		if(_distanceMatrix->matrix[smallestValue.first][i] == nullptr || _distanceMatrix->matrix[i][smallestValue.second] == nullptr)
+		 if(_distanceMatrix.matrix[smallestValue.first][i]._val.empty() || _distanceMatrix.matrix[i][smallestValue.second]._val.empty())
 			continue;
-		float newVal = std::stof(_distanceMatrix->matrix[smallestValue.first][i]->_val) + std::stof(_distanceMatrix->matrix[i][smallestValue.second]->_val)
-			- std::stof(_distanceMatrix->matrix[smallestValue.first][smallestValue.second]->_val);
+		float newVal = std::stof(_distanceMatrix.matrix[smallestValue.first][i]._val) + std::stof(_distanceMatrix.matrix[i][smallestValue.second]._val)
+			- std::stof(_distanceMatrix.matrix[smallestValue.first][smallestValue.second]._val);
 		newVal/=(float)2;
-		_distanceMatrix->matrix[smallestValue.first][i]->_val = std::to_string(newVal);
+		_distanceMatrix.matrix[smallestValue.first][i]._val = std::to_string(newVal);
 	}
 	
-	_distanceMatrix->matrix.erase(_distanceMatrix->matrix.begin() + smallestValue.second);
+	_distanceMatrix.matrix.erase(_distanceMatrix.matrix.begin() + smallestValue.second);
 	for(int i = 0; i < columnLength - 1; i++)
 	{
-		_distanceMatrix->matrix[i].erase(_distanceMatrix->matrix[i].begin() + smallestValue.second);
+		_distanceMatrix.matrix[i].erase(_distanceMatrix.matrix[i].begin() + smallestValue.second);
 	}
 	DNADatabase::Sequences seq = _sequenceFile.sequenceMap.at(columnSequence); // need a function for this
 	DNADatabase::Sequences seq2 = _sequenceFile.sequenceMap.at(columnSequenceTwo);
 	std::vector<std::string> seqVector= seq.SequenceToVector();
 	std::vector<std::string> seqVector2 = seq2.SequenceToVector();
-	Matrix* matrix = GlobalAlignment(seqVector, seqVector2); 
-	Matrix::MatrixNode* node = matrix->matrix[matrix->matrix.size() - 1][matrix->matrix[0].size() - 1];
-	ScoreSequence(node, 0, "", false, seq.name, seq2.name);
-	delete(matrix);
+	Matrix matrix = GlobalAlignment(seqVector, seqVector2); 
+	Matrix::MatrixNode node = matrix.matrix[matrix.matrix.size() - 1][matrix.matrix[0].size() - 1];
+	ScoreSequence(matrix,(int)matrix.matrix.size() - 1, (int)matrix.matrix[0].size() - 1, 0, "", false, seq.name, seq2.name);
 	bool isFirst = false;
 	if(initialSeqName == " ") // only the first one
 	{
 		initialSeqName = columnSequenceTwo;
-		Matrix* mat2 = GlobalAlignment(seqVector, seqVector2); 
-		Matrix::MatrixNode* node2 = mat2->matrix[mat2->matrix.size() - 1][mat2->matrix[0].size() - 1];
-		ScoreSequence(node2, 0, "", false, seq2.name, seq.name);
+		Matrix mat2 = GlobalAlignment(seqVector, seqVector2); 
+		Matrix::MatrixNode node2 = mat2.matrix[mat2.matrix.size() - 1][mat2.matrix[0].size() - 1];
+		ScoreSequence(matrix,(int)mat2.matrix.size() - 1, (int)mat2.matrix[0].size() - 1, 0, "", false, seq2.name, seq.name);
 		std::string keyN = seq2.name + "+" + seq.name;
 		//std::cout << "Alignment: " << _alignmentScores[keyN].second << std::endl;
 		_alignmentScores[keyN].second = _alignmentScores[keyN].second.size() < largestLength ?
@@ -334,7 +336,6 @@ void Alignment::TransformMatrix()
 		alignedSequences.emplace_back(_alignmentScores[keyN].second);
 		_consensusSequence = _alignmentScores[keyN].second;
 		isFirst = true;
-		delete(mat2);
 	}
 	
 	std::string key = seq.name + "+" + seq2.name;
@@ -409,13 +410,13 @@ std::pair<int, int> Alignment::FindSmallestMatrixValue() const // make unit test
 {
 	float val = 0.0;
 	std::pair<int, int> smallestValIndex(-1,-1);
-	for(int i = 1; i < _distanceMatrix->matrix.size() ; i++)
+	for(int i = 1; i < _distanceMatrix.matrix.size() ; i++)
 	{
-		for(int j = 1; j < _distanceMatrix->matrix[0].size() - 1; j++) // -1 to avoid outgroups
+		for(int j = 1; j < _distanceMatrix.matrix[0].size() - 1; j++) // -1 to avoid outgroups
 		{
-			if(_distanceMatrix->matrix[i][j] == nullptr)
-				continue;
-			float newValue = std::stof(_distanceMatrix->matrix[i][j]->_val);
+			 if(_distanceMatrix.matrix[i][j]._val.empty())
+			 	continue;
+			float newValue = std::stof(_distanceMatrix.matrix[i][j]._val);
 			if(smallestValIndex.first == -1)
 			{
 				val = newValue;

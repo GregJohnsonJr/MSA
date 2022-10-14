@@ -10,27 +10,21 @@ namespace Matrices
 	public:
 		struct MatrixNode
 		{
-		public:
 			MatrixNode() {} // 48bytes * 3600 
-			MatrixNode(std::string val, MatrixNode parent, std::string seqLetter)
+			MatrixNode(std::string val, std::string seqLetter)
 			{
-				this->_val = val;
-				this->_parent = &parent;
-				this->_seqLetter = seqLetter;
+				_val = val;
+				_seqLetter = seqLetter;
 			}
-		public:
 			std::string _val = "";
-			MatrixNode* _parent = nullptr;
-			MatrixNode* _top = nullptr;
-			MatrixNode* _middle = nullptr;
-			MatrixNode* _left = nullptr;
 			std::string _seqLetter = "";
 			bool isGap = false;
 		};
-		std::vector<std::vector<MatrixNode*>> matrix;
+		std::vector<std::vector<MatrixNode>> matrix;
+		Matrix() {};
 		Matrix(int ySize, int xSize)
 		{
-			std::vector <std::vector<MatrixNode*>> sMatrix(ySize, std::vector<MatrixNode*>(xSize));
+			std::vector <std::vector<MatrixNode>> sMatrix(ySize, std::vector<MatrixNode>(xSize));
 			matrix = sMatrix;
 		}
 		/// <summary>
@@ -40,17 +34,7 @@ namespace Matrices
 		/// <param name="y">pos</param>
 		/// <param name="val"></param>
 		/// <returns></returns>
-		bool SetMatrixValueAtPosition(int, int, MatrixNode*);
+		bool SetMatrixValueAtPosition(int, int, MatrixNode);
 		void DisplayMatrix();
-		~Matrix()
-		{
-			for (auto i : matrix)
-			{
-				for (auto j : i)
-				{
-					delete(j);
-				}
-			}
-		}
 	};
 }

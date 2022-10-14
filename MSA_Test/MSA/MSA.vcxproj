@@ -144,6 +144,7 @@
     <ClInclude Include="Pam.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Alignmentsamplesequences\LargetFile.txt" />
     <Content Include="Alignmentsamplesequences\MSA_sequences.txt" />
     <Content Include="Outfile.txt" />
   </ItemGroup>
