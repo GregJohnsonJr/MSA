@@ -154,6 +154,14 @@ void Alignment::ScoreSequence(const Matrix::MatrixNode* lastVal, int score, std:
 	else
 	{
 		std::string key = seqOne + "+" + seqTwo;
+		int lens = (int)alignment.size();
+		int sizeToAdd = largestLength - lens;
+		if(alignment.size() < lens)
+		{
+			alignment.append(std::string(sizeToAdd, '-'));
+			score += (_gapScore * sizeToAdd);
+		}
+	
 		std::reverse(alignment.begin(), alignment.end());
 		if (!(_alignmentScores.find(key) == _alignmentScores.end())) // if we do have the key
 		{
