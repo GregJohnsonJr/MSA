@@ -9,7 +9,7 @@
 TEST(DNADatabase, ReadFile) {
     // This test is named "Negative", and belongs to the "FactorialTest"
     // test case.
-    const std::string filePath = "../Alignmentsamplesequences/pairwise_nucleotide_1.fasta";
+    const std::string filePath = R"(F:\MSA\MSA\MSA_Test\MSA\test\Alignmentsamplesequences\pairwise_nucleotide_1.fasta)";
     DNADatabase database(filePath);
     const std::vector<DNADatabase::Sequences> sequences = database.ReadFile();
     EXPECT_EQ(sequences.size(), 2);
