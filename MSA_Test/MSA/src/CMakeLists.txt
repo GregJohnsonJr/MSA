@@ -6,7 +6,8 @@ add_library(core_lib MSA.cpp
         Matrix.cpp
         MSA.cpp
         Pam.cpp
-        Alignment.cpp)
+        Alignment.cpp
+        MultipleSequenceAlignment.cpp)
 
 
 target_include_directories(core_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -18,12 +19,15 @@ set(HEADER_FILES
         Matrix.h
         Pam.h
         Alignment.h
+        MultipleSequenceAlignment.h
+        MatrixDup.h
 )
 
 target_sources(core_lib PRIVATE ${HEADER_FILES})
 
 add_executable(core_exec
-        MSA.cpp  # Your main source file for the executable
+        MSA.cpp
+         # Your main source file for the executable
 )
 
 target_link_libraries(core_exec PRIVATE core_lib)
